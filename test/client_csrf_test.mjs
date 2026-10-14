@@ -6,10 +6,11 @@ import assert from 'node:assert/strict';
 test('RPC sends the page CSRF token and never sends a stored session', async () => {
   let request;
   let token = 'page-token';
+  const removed = [];
   const sandbox = {
     window: {},
     document: { querySelector: () => ({ content: token }) },
-    localStorage: { getItem: () => 'stale-session' },
+    localStorage: { getItem: () => 'stale-session', removeItem: (key) => removed.push(key) },
     fetch: async (url, options) => {
       request = { url, ...options };
       return { status: 200, text: async () => JSON.stringify({ result: 42 }) };
@@ -17,6 +18,7 @@ test('RPC sends the page CSRF token and never sends a stored session', async () 
   };
   vm.createContext(sandbox);
   vm.runInContext(readFileSync(new URL('../client.js', import.meta.url), 'utf8'), sandbox);
+  assert.deepEqual(removed, ['sessionId']);
   sandbox.grow = sandbox.window.grow;
   sandbox.grow.urlPrefix = '/repliker';
   assert.equal(await sandbox.grow.plant('Example').write('value'), 42);

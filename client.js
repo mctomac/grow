@@ -7,6 +7,8 @@ class ZodError extends Error {
 }
 
 (function () {
+  // Purge a legacy browser session without dispatching logout on page load.
+  localStorage.removeItem("sessionId");
   const listeners = {};
 
   window.grow = {
