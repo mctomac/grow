@@ -69,6 +69,7 @@ function serveClient(app: Hono) {
 
   app.get("/grow.js", (c) => {
     c.header("content-type", "text/javascript");
+    c.header("cache-control", "no-cache");
     return c.body(client);
   });
 }
